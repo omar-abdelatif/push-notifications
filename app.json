@@ -21,7 +21,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.omarmero.myapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -34,6 +35,11 @@
           "color": "#ffffff"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "1a77ffdf-5c86-4a10-9ff7-666c13594dcc"
+      }
+    }
   }
 }

@@ -29,13 +29,13 @@ export default function App() {
         return
       }
 
-      const pushTokenData = (await Notifications.getExpoPushTokenAsync({ projectId: '37d3746c-44c4-4345-b2d6-544cb658dc11' })).data;
+      const pushTokenData = await Notifications.getExpoPushTokenAsync({ projectId: '1a77ffdf-5c86-4a10-9ff7-666c13594dcc' }).data;
       console.log(pushTokenData)
 
       if (Platform.OS === 'android') {
         Notifications.setNotificationChannelAsync('default', {
           name: 'default',
-          importance: Notifications.AndroidImportance.MAX,
+          importance: Notifications.AndroidImportance.DEFAULT,
           vibrationPattern: [0, 250, 250, 250],
           lightColor: '#FF231F7C',
         })
