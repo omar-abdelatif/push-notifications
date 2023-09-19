@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { Alert, Button, StyleSheet, Platform, View } from 'react-native';
 import * as Notifications from 'expo-notifications'
+import * as Device from 'expo-device';
 import { useEffect } from 'react';
 
 Notifications.setNotificationHandler({
@@ -15,30 +16,32 @@ Notifications.setNotificationHandler({
 
 export default function App() {
   useEffect(() => {
+
     async function configPushNotifications() {
-      const { status } = await Notifications.getPermissionsAsync()
-      let finalStatus = status
-
-      if (finalStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync()
-        finalStatus = status
-      }
-
-      if (finalStatus !== 'granted') {
-        Alert.alert('Permission Required', 'Push notifications need the appropriate permissions')
-        return
-      }
-
-      const pushTokenData = await Notifications.getExpoPushTokenAsync({ projectId: '1a77ffdf-5c86-4a10-9ff7-666c13594dcc' }).data;
-      console.log(pushTokenData)
-
+      let token
       if (Platform.OS === 'android') {
-        Notifications.setNotificationChannelAsync('default', {
+        await Notifications.setNotificationChannelAsync('default', {
           name: 'default',
-          importance: Notifications.AndroidImportance.DEFAULT,
+          importance: Notifications.AndroidImportance.MAX,
           vibrationPattern: [0, 250, 250, 250],
           lightColor: '#FF231F7C',
-        })
+        });
+      }
+      if (Device.isDevice) {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== 'granted') {
+          const { status } = await Notifications.requestPermissionsAsync();
+          finalStatus = status;
+        }
+        if (finalStatus !== 'granted') {
+          alert('Failed to get push token for push notification!');
+          return;
+        }
+        token = (await Notifications.getExpoPushTokenAsync({ projectId: '1a77ffdf-5c86-4a10-9ff7-666c13594dcc' }));
+        console.log(token)
+      } else {
+        alert('Must use physical device for Push Notifications');
       }
     }
     configPushNotifications()
@@ -61,7 +64,7 @@ export default function App() {
       subscription2.remove();
     }
   }, [])
-  function schefuleNotificationHandler() {
+  function scheduleNotificationHandler() {
     Notifications.scheduleNotificationAsync({
       content: {
         title: 'my first local notification',
@@ -73,9 +76,20 @@ export default function App() {
       }
     })
   }
+
+  function sendPushNotificationHandler() {
+    fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+        to: 'ExponentPushToken[YG3laPLpQpfaDlAE1G7Glh]',
+        title: 'Test',
+        body: 'This Test Text Comes From The Real Device'
+      })
+    })
+  }
   return (
     <View style={styles.container}>
-      <Button title='Schedule Notification' onPress={schefuleNotificationHandler} />
+      <Button title='Schedule Notification' onPress={scheduleNotificationHandler} />
+      <Button title='Send Push Notification' onPress={sendPushNotificationHandler} />
       <StatusBar style="auto" />
     </View>
   );
